@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Add a new recipe</h2>
+
+<form action="{% url 'add_recipe' %}" method="POST">
+  {% csrf_token %}
+
+  {% for field in form %}
+  <div class="form-field mb3">
+    <label class="db f5 mb2" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {{ field }}
+  </div>
+  {% endfor %}
+
+  <div>
+    <button type="submit">Add new recipe</button>
+  </div>
+</form>
+
+{% endblock %}

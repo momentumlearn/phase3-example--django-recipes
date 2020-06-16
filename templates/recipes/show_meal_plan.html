@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Meal plan for {{ date }}</h1>
+
+<ul>
+  {% for recipe in plan.recipes.all %}
+    <li><a href="{% url 'recipe_detail' recipe_pk=recipe.pk %}">{{ recipe.title }}</a></li>
+  {% endfor %}
+</ul>
+
+<p>
+  <a href="{% url 'show_meal_plan' year=prev_day.year month=prev_day.month day=prev_day.day %}">{{ prev_day }}</a> |
+  <a href="{% url 'show_meal_plan' year=next_day.year month=next_day.month day=next_day.day %}">{{ next_day }}</a>
+</p>
+
+<h2>Add a recipe</h2>
+<form action="{% url 'show_meal_plan' year=date.year month=date.month day=date.day %}" method="POST">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <p>
+    <button type="submit">Add recipe</button>
+  </p>
+</form>
+
+{% endblock %}

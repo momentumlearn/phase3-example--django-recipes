@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Recipe Book - {{ recipe.title }}
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'js/recipe.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<h2>{{ recipe.title }}</h2>
+{% if recipe.original_recipe %}
+<p>Copied from <a href="{% url 'recipe_detail' recipe_pk=recipe.original_recipe.pk %}">{{ recipe.original_recipe.title }}</a></p>
+{% endif %}
+
+<p class="f6">
+  <a href="{% url 'edit_recipe' recipe_pk=recipe.pk %}">Edit this recipe</a>
+  <a class="red" href="{% url 'delete_recipe' recipe_pk=recipe.pk %}">Delete this recipe</a>
+  <a href="{% url 'copy_recipe' recipe_pk=recipe.pk %}">Copy this recipe</a>
+</p>
+
+{% if recipe.prep_time_in_minutes %}
+  <p><strong>Prep time</strong>: {{ recipe.prep_time_in_minutes }} minutes</p>
+{% endif %}
+
+{% if recipe.cook_time_in_minutes %}
+  <p><strong>Cook time</strong>: {{ recipe.cook_time_in_minutes }} minutes</p>
+{% endif %}
+
+<p><strong>Times cooked</strong>: {{ recipe.times_cooked }}</p>
+
+{% if recipe.first_cooked %}
+  <p><strong>First cooked</strong>: {{ recipe.first_cooked }}</p>
+{% endif %}
+
+{% if recipe.tags.count > 0 %}
+<ul class="list pl0">
+  {% for tag in recipe.tags.all %}
+    <li class="dib mr2 pa2 bg-washed-red"><a class="black no-underline" href="{% url 'view_tag' tag_name=tag.tag %}">{{ tag }}</a></li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<h3>Ingredients ({{ recipe.num_ingredients }})</h3>
+
+<ul>
+  {% for ingredient in recipe.ingredients.all %}
+    <li>{{ ingredient }}</li>
+  {% endfor %}
+</ul>
+
+{% if recipe.ingredients.count > 0 %}
+<p><a id="show-ingredient-form" href="{% url 'add_ingredient' recipe_pk=recipe.pk %}">Add another ingredient</a></p>
+{% endif %}
+
+<form class="{% if recipe.ingredients.count > 0 %}dn{% endif %}" id="ingredient-form" action="{% url 'add_ingredient' recipe_pk=recipe.pk %}" method="POST">
+  {% csrf_token %}
+  {{ ingredient_form.as_p }}
+  <div><button type="submit">Add ingredient</button></div>
+</form>
+
+<h3>Directions</h3>
+
+<ol>
+  {% for step in recipe.steps.all %}
+    <li>{{ step.text }}</li>
+  {% endfor %}
+</ol>
+<p><a href="{% url 'add_recipe_step' recipe_pk=recipe.pk %}">Add another step</a></p>
+
+{% endblock %}
