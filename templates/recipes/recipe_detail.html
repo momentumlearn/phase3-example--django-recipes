@@ -16,9 +16,13 @@ Recipe Book - {{ recipe.title }}
 {% endif %}
 
 <p class="f6">
-  <a href="{% url 'edit_recipe' recipe_pk=recipe.pk %}">Edit this recipe</a>
-  <a class="red" href="{% url 'delete_recipe' recipe_pk=recipe.pk %}">Delete this recipe</a>
+  {% if user == recipe.user %}
+    <a href="{% url 'edit_recipe' recipe_pk=recipe.pk %}">Edit this recipe</a>
+    <a class="red" href="{% url 'delete_recipe' recipe_pk=recipe.pk %}">Delete this recipe</a>
+  {% endif %}
+  {% if user.is_authenticated %}
   <a href="{% url 'copy_recipe' recipe_pk=recipe.pk %}">Copy this recipe</a>
+  {% endif %}
 </p>
 
 {% if recipe.prep_time_in_minutes %}
@@ -51,15 +55,17 @@ Recipe Book - {{ recipe.title }}
   {% endfor %}
 </ul>
 
-{% if recipe.ingredients.count > 0 %}
-<p><a id="show-ingredient-form" href="{% url 'add_ingredient' recipe_pk=recipe.pk %}">Add another ingredient</a></p>
-{% endif %}
+{% if user == recipe.user %}
+  {% if recipe.ingredients.count > 0 %}
+  <p><a id="show-ingredient-form" href="{% url 'add_ingredient' recipe_pk=recipe.pk %}">Add another ingredient</a></p>
+  {% endif %}
 
-<form class="{% if recipe.ingredients.count > 0 %}dn{% endif %}" id="ingredient-form" action="{% url 'add_ingredient' recipe_pk=recipe.pk %}" method="POST">
-  {% csrf_token %}
-  {{ ingredient_form.as_p }}
-  <div><button type="submit">Add ingredient</button></div>
-</form>
+  <form class="{% if recipe.ingredients.count > 0 %}dn{% endif %}" id="ingredient-form" action="{% url 'add_ingredient' recipe_pk=recipe.pk %}" method="POST">
+    {% csrf_token %}
+    {{ ingredient_form.as_p }}
+    <div><button type="submit">Add ingredient</button></div>
+  </form>
+{% endif %}
 
 <h3>Directions</h3>
 
@@ -68,6 +74,9 @@ Recipe Book - {{ recipe.title }}
     <li>{{ step.text }}</li>
   {% endfor %}
 </ol>
-<p><a href="{% url 'add_recipe_step' recipe_pk=recipe.pk %}">Add another step</a></p>
+
+{% if user == recipe.user %}
+  <p><a href="{% url 'add_recipe_step' recipe_pk=recipe.pk %}">Add another step</a></p>
+{% endif %}
 
 {% endblock %}

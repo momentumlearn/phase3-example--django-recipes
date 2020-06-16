@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Tag, Recipe, search_recipes_for_user
-from django.db.models import Count, Min
+from .models import Tag, Recipe, search_recipes_for_user, get_available_recipes_for_user
+from django.db.models import Count, Min, Q
 from .forms import RecipeForm, IngredientForm, RecipeStepForm, make_meal_plan_form_for_user
 import datetime
 
@@ -15,23 +15,21 @@ def homepage(request):
     return render(request, "recipes/home.html")
 
 
-@login_required
 def recipe_list(request):
-    your_recipes = request.user.recipes.all()
+    recipes = get_available_recipes_for_user(Recipe.objects, request.user).order_by('title')
 
     return render(request, "recipes/recipe_list.html",
-                  {"recipes": your_recipes})
+                  {"recipes": recipes})
 
 
-@login_required
 def recipe_detail(request, recipe_pk):
-    # user_recipes = Recipe.objects.filter(user=request.user)
-    user_recipes = request.user.recipes.annotate(
+    recipes = get_available_recipes_for_user(Recipe.objects, request.user).order_by('title')
+    recipes = recipes.annotate(
         num_ingredients=Count('ingredients'),
         times_cooked=Count('meal_plans'),
         first_cooked=Min('meal_plans__date'))
 
-    recipe = get_object_or_404(user_recipes, pk=recipe_pk)
+    recipe = get_object_or_404(recipes, pk=recipe_pk)
     ingredient_form = IngredientForm()
     return render(request, "recipes/recipe_detail.html", {
         "recipe": recipe,
@@ -126,21 +124,21 @@ def add_recipe_step(request, recipe_pk):
     })
 
 
-@login_required
 def view_tag(request, tag_name):
     """
     Given a tag name, look up the tag and then get all recipes for the
     current user with that tag.
     """
     tag = get_object_or_404(Tag, tag=tag_name)
-    recipes = tag.recipes.filter(user=request.user)
+
+    recipes = get_available_recipes_for_user(tag.recipes, request.user).order_by('title')
+
     return render(request, "recipes/tag_detail.html", {
         "tag": tag,
         "recipes": recipes
     })
 
 
-@login_required
 def search_recipes(request):
     """
     Show a search form. If the user has submitted the form, show the results of the search.

@@ -70,12 +70,6 @@ class RecipeStep(OrderedModel):
         return f"{self.order} {self.text}"
 
 
-def search_recipes_for_user(user, query):
-    return user.recipes.filter(
-        Q(title__icontains=query)
-        | Q(ingredients__item__icontains=query)).distinct()
-
-
 class MealPlan(models.Model):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="meal_plans")
     date = models.DateField(verbose_name="Date for plan")
@@ -86,3 +80,17 @@ class MealPlan(models.Model):
             'user',
             'date',
         ]
+
+def search_recipes_for_user(user, search_term):
+    recipes = get_available_recipes_for_user(Recipe.objects, user)
+    return recipes.filter(
+        Q(title__icontains=search_term)
+        | Q(ingredients__item__icontains=search_term)).distinct()
+
+def get_available_recipes_for_user(queryset, user):
+    if user.is_authenticated:
+        recipes = queryset.filter(Q(public=True) | Q(user=user))
+    else:
+        recipes = queryset.filter(public=True)
+    return recipes
+
