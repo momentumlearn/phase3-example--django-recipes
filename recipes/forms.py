@@ -15,6 +15,7 @@ class RecipeForm(forms.ModelForm):
             'title',
             'prep_time_in_minutes',
             'cook_time_in_minutes',
+            'public',
         ]
         widgets = {
             'title':
@@ -22,7 +23,7 @@ class RecipeForm(forms.ModelForm):
             'prep_time_in_minutes':
             forms.NumberInput(attrs={'class': 'pa2 f4 w-100'}),
             'cook_time_in_minutes':
-            forms.NumberInput(attrs={'class': 'pa2 f4 w-100'})
+            forms.NumberInput(attrs={'class': 'pa2 f4 w-100'}),
         }
 
 
