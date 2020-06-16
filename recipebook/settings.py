@@ -149,3 +149,8 @@ INTERNAL_IPS = [
 # django-registration-redux settings
 
 LOGIN_REDIRECT_URL = '/'
+
+# Django-Heroku setup
+import django_heroku
+django_heroku.settings(locals())
+del DATABASES['default']['OPTIONS']['sslmode']
