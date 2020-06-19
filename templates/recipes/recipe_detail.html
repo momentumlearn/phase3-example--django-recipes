@@ -10,7 +10,18 @@ Recipe Book - {{ recipe.title }}
 {% endblock %}
 
 {% block content %}
-<h2>{{ recipe.title }}</h2>
+<h2>
+  {{ recipe.title }}
+  {% if user.is_authenticated %}
+  <a style="text-decoration: none; color: green;" id="favorite-recipe" data-recipe-id="{{ recipe.pk }}" href="#">
+  {% if is_user_favorite %}
+    &#x2605;
+  {% else %}
+    &#x2606;
+  {% endif %}
+  </a>
+  {% endif %}
+</h2>
 {% if recipe.original_recipe %}
 <p>Copied from <a href="{% url 'recipe_detail' recipe_pk=recipe.original_recipe.pk %}">{{ recipe.original_recipe.title }}</a></p>
 {% endif %}
@@ -21,7 +32,7 @@ Recipe Book - {{ recipe.title }}
     <a class="red" href="{% url 'delete_recipe' recipe_pk=recipe.pk %}">Delete this recipe</a>
   {% endif %}
   {% if user.is_authenticated %}
-  <a href="{% url 'copy_recipe' recipe_pk=recipe.pk %}">Copy this recipe</a>
+    <a href="{% url 'copy_recipe' recipe_pk=recipe.pk %}">Copy this recipe</a>
   {% endif %}
 </p>
 
@@ -78,5 +89,26 @@ Recipe Book - {{ recipe.title }}
 {% if user == recipe.user %}
   <p><a href="{% url 'add_recipe_step' recipe_pk=recipe.pk %}">Add another step</a></p>
 {% endif %}
+
+<script>
+  const favoriteRecipeLink = document.querySelector("#favorite-recipe")
+  favoriteRecipeLink.addEventListener('click', event => {
+    event.preventDefault()
+    const recipeId = favoriteRecipeLink.dataset.recipeId
+    fetch('/recipes/' + recipeId + '/favorite/', {
+      method: 'POST',
+      credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.isFavorite) {
+        favoriteRecipeLink.innerHTML = '&#x2605;'
+      } else {
+        favoriteRecipeLink.innerHTML = '&#x2606;'
+      }
+    })
+  })
+</script>
+
 
 {% endblock %}

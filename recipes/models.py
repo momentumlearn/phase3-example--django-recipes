@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Q
+from django.contrib.postgres.search import SearchVector
 from users.models import User
 from ordered_model.models import OrderedModel
 
@@ -11,6 +12,27 @@ class Tag(models.Model):
         return self.tag
 
 
+def make_fake_recipe(user):
+    from faker import Faker
+    import random
+    f = Faker()
+    recipe = Recipe(title=(" ".join(f.words(3))),
+                    user=user,
+                    prep_time_in_minutes=random.randint(10, 60),
+                    cook_time_in_minutes=random.randint(10, 120),
+                    public=(random.random() < 0.8))
+    recipe.save()
+    for _ in range(random.randint(2, 8)):
+        ingredient = Ingredient(recipe=recipe,
+                                amount=str(random.randint(1, 10)),
+                                item=f.word())
+        ingredient.save()
+    for i in range(random.randint(3, 6)):
+        step = RecipeStep(recipe=recipe, text=f.paragraph())
+        step.order = i + 1
+        step.save()
+
+
 class Recipe(models.Model):
     user = models.ForeignKey(to=User,
                              on_delete=models.CASCADE,
@@ -19,8 +41,13 @@ class Recipe(models.Model):
     prep_time_in_minutes = models.PositiveIntegerField(null=True, blank=True)
     cook_time_in_minutes = models.PositiveIntegerField(null=True, blank=True)
     tags = models.ManyToManyField(to=Tag, related_name="recipes")
-    original_recipe = models.ForeignKey(to='self', on_delete=models.SET_NULL, null=True, blank=True)
+    original_recipe = models.ForeignKey(to='self',
+                                        on_delete=models.SET_NULL,
+                                        null=True,
+                                        blank=True)
     public = models.BooleanField(default=True)
+    favorited_by = models.ManyToManyField(to=User,
+                                          related_name='favorite_recipes')
 
     def get_tag_names(self):
         tag_names = []
@@ -71,7 +98,9 @@ class RecipeStep(OrderedModel):
 
 
 class MealPlan(models.Model):
-    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="meal_plans")
+    user = models.ForeignKey(to=User,
+                             on_delete=models.CASCADE,
+                             related_name="meal_plans")
     date = models.DateField(verbose_name="Date for plan")
     recipes = models.ManyToManyField(to=Recipe, related_name="meal_plans")
 
@@ -81,11 +110,14 @@ class MealPlan(models.Model):
             'date',
         ]
 
+
 def search_recipes_for_user(user, search_term):
     recipes = get_available_recipes_for_user(Recipe.objects, user)
-    return recipes.filter(
-        Q(title__icontains=search_term)
-        | Q(ingredients__item__icontains=search_term)).distinct()
+    return recipes \
+        .annotate(search=SearchVector('title', 'ingredients__item', 'steps__text', 'tags__tag', 'user__username')) \
+        .filter(search=search_term) \
+        .distinct('pk')
+
 
 def get_available_recipes_for_user(queryset, user):
     if user.is_authenticated:
@@ -93,4 +125,3 @@ def get_available_recipes_for_user(queryset, user):
     else:
         recipes = queryset.filter(public=True)
     return recipes
-

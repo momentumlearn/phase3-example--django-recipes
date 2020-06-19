@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from .models import Tag, Recipe, search_recipes_for_user, get_available_recipes_for_user
 from django.db.models import Count, Min, Q
 from .forms import RecipeForm, IngredientForm, RecipeStepForm, make_meal_plan_form_for_user
 import datetime
+from django.http import JsonResponse
 
 # Create your views here.
 
@@ -16,25 +18,46 @@ def homepage(request):
 
 
 def recipe_list(request):
-    recipes = get_available_recipes_for_user(Recipe.objects, request.user).order_by('title')
+    recipes = get_available_recipes_for_user(Recipe.objects,
+                                             request.user).order_by('title')
 
-    return render(request, "recipes/recipe_list.html",
-                  {"recipes": recipes})
+    return render(request, "recipes/recipe_list.html", {"recipes": recipes})
 
 
 def recipe_detail(request, recipe_pk):
-    recipes = get_available_recipes_for_user(Recipe.objects, request.user).order_by('title')
+    recipes = get_available_recipes_for_user(Recipe.objects,
+                                             request.user).order_by('title')
     recipes = recipes.annotate(
         num_ingredients=Count('ingredients'),
         times_cooked=Count('meal_plans'),
-        first_cooked=Min('meal_plans__date'))
+        first_cooked=Min('meal_plans__date'),
+    )
 
     recipe = get_object_or_404(recipes, pk=recipe_pk)
+
+    is_user_favorite = request.user.is_favorite_recipe(recipe)
+
     ingredient_form = IngredientForm()
-    return render(request, "recipes/recipe_detail.html", {
-        "recipe": recipe,
-        "ingredient_form": ingredient_form,
-    })
+    return render(
+        request, "recipes/recipe_detail.html", {
+            "recipe": recipe,
+            "ingredient_form": ingredient_form,
+            "is_user_favorite": is_user_favorite,
+        })
+
+
+@login_required
+@csrf_exempt
+def toggle_favorite_recipe(request, recipe_pk):
+    recipes = get_available_recipes_for_user(Recipe.objects, request.user)
+    recipe = get_object_or_404(recipes, pk=recipe_pk)
+
+    if request.user.is_favorite_recipe(recipe):
+        request.user.favorite_recipes.remove(recipe)
+        return JsonResponse({"isFavorite": False})
+    else:
+        request.user.favorite_recipes.add(recipe)
+        return JsonResponse({"isFavorite": True})
 
 
 @login_required
@@ -131,7 +154,8 @@ def view_tag(request, tag_name):
     """
     tag = get_object_or_404(Tag, tag=tag_name)
 
-    recipes = get_available_recipes_for_user(tag.recipes, request.user).order_by('title')
+    recipes = get_available_recipes_for_user(tag.recipes,
+                                             request.user).order_by('title')
 
     return render(request, "recipes/tag_detail.html", {
         "tag": tag,
@@ -152,7 +176,7 @@ def search_recipes(request):
 
     return render(request, "recipes/search.html", {
         "recipes": recipes,
-        "query": query
+        "query": query or ""
     })
 
 
