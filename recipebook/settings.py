@@ -50,10 +50,12 @@ INSTALLED_APPS = [
     'django_extensions',
     'registration',
     'ordered_model',
+    'rest_framework',
 
     # Project-specific
     'users',
     'recipes',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -150,6 +152,12 @@ INTERNAL_IPS = [
 # django-registration-redux settings
 
 LOGIN_REDIRECT_URL = '/'
+
+# REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES':
+    ['rest_framework.permissions.IsAuthenticatedOrReadOnly']
+}
 
 # Django-Heroku setup
 import django_heroku
