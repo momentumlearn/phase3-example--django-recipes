@@ -19,9 +19,9 @@ from django.urls import include, path
 from recipes import views as recipes_views
 from api import views as api_views
 from rest_framework import routers
+from rest_framework.authtoken import views as authtoken_views
 
 router = routers.DefaultRouter()
-router.register('users', api_views.UserViewSet)
 router.register('recipes', api_views.RecipeViewSet, basename='recipe')
 
 urlpatterns = [
@@ -62,6 +62,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('registration.backends.simple.urls')),
     path('api-auth/', include('rest_framework.urls')),
+    path('api/auth/', include('djoser.urls')),
+    path('api/auth/', include('djoser.urls.authtoken')),
     path('api/', include(router.urls)),
 ]
 
