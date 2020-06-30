@@ -82,6 +82,11 @@ class Recipe(models.Model):
             tags.append(tag)
         self.tags.set(tags)
 
+    def total_time_in_minutes(self):
+        if self.cook_time_in_minutes is None or self.prep_time_in_minutes is None:
+            return None
+        return self.cook_time_in_minutes + self.prep_time_in_minutes
+
     def __str__(self):
         return self.title
 
