@@ -65,6 +65,9 @@ urlpatterns = [
     path('api/auth/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.authtoken')),
     path('api/', include(router.urls)),
+    path('api/user_recipes/<str:username>/',
+         api_views.UserRecipesView.as_view(),
+         name='api_user_recipes'),
 ]
 
 if settings.DEBUG:
