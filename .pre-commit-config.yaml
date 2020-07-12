@@ -1,0 +1,4 @@
+- repo: ../../momentumlearn/pre-commit-hooks
+  rev: main
+  hooks:
+    - id: export-poetry
