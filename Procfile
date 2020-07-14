@@ -1,1 +1,1 @@
-web: gunicorn recipebook.wsgi
+web: gunicorn project.wsgi
