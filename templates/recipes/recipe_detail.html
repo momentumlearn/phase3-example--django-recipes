@@ -12,15 +12,13 @@ Recipe Book - {{ recipe.title }}
 {% block content %}
 <h2>
   {{ recipe.title }}
-  {% if user.is_authenticated %}
-  <a style="text-decoration: none; color: green;" id="favorite-recipe" data-recipe-id="{{ recipe.pk }}" href="#">
+  <a id="toggle-favorite" data-recipe-id="{{ recipe.pk }}" class="no-underline pointer dib grow">
   {% if is_user_favorite %}
-    &#x2605;
+    &#9733;
   {% else %}
-    &#x2606;
+    &#9734;
   {% endif %}
   </a>
-  {% endif %}
 </h2>
 {% if recipe.original_recipe %}
 <p>Copied from <a href="{% url 'recipe_detail' recipe_pk=recipe.original_recipe.pk %}">{{ recipe.original_recipe.title }}</a></p>
@@ -91,24 +89,24 @@ Recipe Book - {{ recipe.title }}
 {% endif %}
 
 <script>
-  const favoriteRecipeLink = document.querySelector("#favorite-recipe")
-  favoriteRecipeLink.addEventListener('click', event => {
-    event.preventDefault()
-    const recipeId = favoriteRecipeLink.dataset.recipeId
-    fetch('/recipes/' + recipeId + '/favorite/', {
-      method: 'POST',
-      credentials: 'include'
+  const toggleFavoriteLink = document.querySelector("#toggle-favorite")
+  toggleFavoriteLink.addEventListener('click', function (e) {
+    e.preventDefault()
+    const recipeId = toggleFavoriteLink.dataset['recipeId']
+    fetch(`/recipes/${recipeId}/favorite/`, {
+      method: 'POST'
     })
     .then(res => res.json())
     .then(data => {
-      if (data.isFavorite) {
-        favoriteRecipeLink.innerHTML = '&#x2605;'
+      if (data.favorite) {
+        toggleFavoriteLink.innerHTML = '&#9733;'
       } else {
-        favoriteRecipeLink.innerHTML = '&#x2606;'
+        toggleFavoriteLink.innerHTML = '&#9734;'
       }
     })
+
   })
 </script>
 
-
 {% endblock %}
+

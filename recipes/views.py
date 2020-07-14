@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from .models import Tag, Recipe, search_recipes_for_user, get_available_recipes_for_user
 from django.db.models import Count, Min, Q
 from .forms import RecipeForm, IngredientForm, RecipeStepForm, make_meal_plan_form_for_user
@@ -21,12 +22,13 @@ def recipe_list(request):
     recipes = get_available_recipes_for_user(Recipe.objects,
                                              request.user).order_by('title')
 
+    recipes = recipes.annotate(times_favorited=Count('favorited_by'))
+
     return render(request, "recipes/recipe_list.html", {"recipes": recipes})
 
 
 def recipe_detail(request, recipe_pk):
-    recipes = get_available_recipes_for_user(Recipe.objects,
-                                             request.user).order_by('title')
+    recipes = get_available_recipes_for_user(Recipe.objects, request.user)
     recipes = recipes.annotate(
         num_ingredients=Count('ingredients'),
         times_cooked=Count('meal_plans'),
@@ -44,20 +46,6 @@ def recipe_detail(request, recipe_pk):
             "ingredient_form": ingredient_form,
             "is_user_favorite": is_user_favorite,
         })
-
-
-@login_required
-@csrf_exempt
-def toggle_favorite_recipe(request, recipe_pk):
-    recipes = get_available_recipes_for_user(Recipe.objects, request.user)
-    recipe = get_object_or_404(recipes, pk=recipe_pk)
-
-    if request.user.is_favorite_recipe(recipe):
-        request.user.favorite_recipes.remove(recipe)
-        return JsonResponse({"isFavorite": False})
-    else:
-        request.user.favorite_recipes.add(recipe)
-        return JsonResponse({"isFavorite": True})
 
 
 @login_required
@@ -105,6 +93,22 @@ def delete_recipe(request, recipe_pk):
         return redirect(to='recipe_list')
 
     return render(request, "recipes/delete_recipe.html", {"recipe": recipe})
+
+
+@login_required
+@csrf_exempt
+@require_POST
+def toggle_favorite_recipe(request, recipe_pk):
+    recipe = get_object_or_404(get_available_recipes_for_user(
+        Recipe.objects, request.user),
+                               pk=recipe_pk)
+
+    if recipe in request.user.favorite_recipes.all():
+        request.user.favorite_recipes.remove(recipe)
+        return JsonResponse({"favorite": False})
+    else:
+        request.user.favorite_recipes.add(recipe)
+        return JsonResponse({"favorite": True})
 
 
 @login_required

@@ -35,7 +35,7 @@ urlpatterns = [
          name='copy_recipe'),
     path('recipes/<int:recipe_pk>/favorite/',
          recipes_views.toggle_favorite_recipe,
-         name='toggle_favorite_recipe'),
+         name="toggle_favorite_recipe"),
     path('recipes/new/', recipes_views.add_recipe, name='add_recipe'),
     path('recipes/<int:recipe_pk>/add_ingredient/',
          recipes_views.add_ingredient,
