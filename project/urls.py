@@ -17,12 +17,6 @@ from django.contrib import admin
 from django.conf import settings
 from django.urls import include, path
 from recipes import views as recipes_views
-from api import views as api_views
-from rest_framework import routers
-from rest_framework.authtoken import views as authtoken_views
-
-router = routers.DefaultRouter()
-router.register('recipes', api_views.RecipeViewSet, basename='recipe')
 
 urlpatterns = [
     path('', recipes_views.homepage, name="homepage"),
@@ -61,13 +55,6 @@ urlpatterns = [
     path('tags/<str:tag_name>/', recipes_views.view_tag, name='view_tag'),
     path('admin/', admin.site.urls),
     path('accounts/', include('registration.backends.simple.urls')),
-    path('api-auth/', include('rest_framework.urls')),
-    path('api/auth/', include('djoser.urls')),
-    path('api/auth/', include('djoser.urls.authtoken')),
-    path('api/', include(router.urls)),
-    path('api/user_recipes/<str:username>/',
-         api_views.UserRecipesView.as_view(),
-         name='api_user_recipes'),
 ]
 
 if settings.DEBUG:

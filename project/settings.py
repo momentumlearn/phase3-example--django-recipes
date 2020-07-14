@@ -50,14 +50,10 @@ INSTALLED_APPS = [
     'django_extensions',
     'registration',
     'ordered_model',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'djoser',
 
     # Project-specific
     'users',
     'recipes',
-    'api',
 ]
 
 MIDDLEWARE = [
@@ -154,16 +150,6 @@ INTERNAL_IPS = [
 # django-registration-redux settings
 
 LOGIN_REDIRECT_URL = '/'
-
-# REST Framework settings
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES':
-    ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ]
-}
 
 # Configure Django App for Heroku.
 import django_heroku
