@@ -7,6 +7,9 @@ from django.db.models import Count, Min, Q
 from .forms import RecipeForm, IngredientForm, RecipeStepForm, make_meal_plan_form_for_user
 import datetime
 from django.http import JsonResponse
+from django.views import View
+from django.views.generic import ListView, DetailView
+from django.utils.decorators import method_decorator
 
 # Create your views here.
 
@@ -18,34 +21,29 @@ def homepage(request):
     return render(request, "recipes/home.html")
 
 
-def recipe_list(request):
-    recipes = get_available_recipes_for_user(Recipe.objects,
-                                             request.user).order_by('title')
-
-    recipes = recipes.annotate(times_favorited=Count('favorited_by'))
-
-    return render(request, "recipes/recipe_list.html", {"recipes": recipes})
+class RecipeListView(ListView):
+    def get_queryset(self):
+        return Recipe.objects.for_user(
+            self.request.user).order_by('title').annotate(
+                times_favorited=Count('favorited_by'))
 
 
-def recipe_detail(request, recipe_pk):
-    recipes = get_available_recipes_for_user(Recipe.objects, request.user)
-    recipes = recipes.annotate(
-        num_ingredients=Count('ingredients'),
-        times_cooked=Count('meal_plans'),
-        first_cooked=Min('meal_plans__date'),
-    )
+class RecipeDetailView(DetailView):
+    def get_queryset(self):
+        recipes = Recipe.objects.for_user(self.request.user)
+        recipes = recipes.annotate(
+            num_ingredients=Count('ingredients'),
+            times_cooked=Count('meal_plans'),
+            first_cooked=Min('meal_plans__date'),
+        )
+        return recipes
 
-    recipe = get_object_or_404(recipes, pk=recipe_pk)
-
-    is_user_favorite = request.user.is_favorite_recipe(recipe)
-
-    ingredient_form = IngredientForm()
-    return render(
-        request, "recipes/recipe_detail.html", {
-            "recipe": recipe,
-            "ingredient_form": ingredient_form,
-            "is_user_favorite": is_user_favorite,
-        })
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_user_favorite'] = self.request.user.is_favorite_recipe(
+            self.object)
+        context['ingredient_form'] = IngredientForm()
+        return context
 
 
 @login_required
@@ -62,6 +60,23 @@ def add_recipe(request):
         form = RecipeForm()
 
     return render(request, "recipes/add_recipe.html", {"form": form})
+
+
+@method_decorator(login_required, name='dispatch')
+class AddRecipeView(View):
+    def get(self, request):
+        form = RecipeForm()
+        return render(request, "recipes/add_recipe.html", {"form": form})
+
+    def post(self, request):
+        form = RecipeForm(data=request.POST)
+        if form.is_valid():
+            recipe = form.save(commit=False)
+            recipe.user = request.user
+            recipe.save()
+            recipe.set_tag_names(form.cleaned_data['tag_names'])
+            return redirect(to='recipe_detail', recipe_pk=recipe.pk)
+        return render(request, "recipes/add_recipe.html", {"form": form})
 
 
 @login_required
@@ -158,8 +173,7 @@ def view_tag(request, tag_name):
     """
     tag = get_object_or_404(Tag, tag=tag_name)
 
-    recipes = get_available_recipes_for_user(tag.recipes,
-                                             request.user).order_by('title')
+    recipes = tag.recipes.for_user(request.user).order_by('title')
 
     return render(request, "recipes/tag_detail.html", {
         "tag": tag,
@@ -174,7 +188,7 @@ def search_recipes(request):
     query = request.GET.get('q')
 
     if query is not None:
-        recipes = search_recipes_for_user(request.user, query)
+        recipes = Recipe.objects.search(query).for_user(request.user).public()
     else:
         recipes = None
 

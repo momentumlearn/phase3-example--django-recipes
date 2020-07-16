@@ -37,7 +37,27 @@ def make_fake_recipe(user):
         step.save()
 
 
+class RecipeQuerySet(models.QuerySet):
+    def for_user(self, user):
+        if user.is_authenticated:
+            recipes = self.filter(Q(public=True) | Q(user=user))
+        else:
+            recipes = self.filter(public=True)
+        return recipes
+
+    def search(self, search_term):
+        recipes = self.annotate(search=SearchVector(
+            'title', 'ingredients__item', 'steps__text', 'tags__tag'))
+        recipes = recipes.filter(search=search_term).distinct('pk')
+        return recipes
+
+    def public(self):
+        return self.filter(public=True)
+
+
 class Recipe(models.Model):
+    objects = RecipeQuerySet.as_manager()
+
     user = models.ForeignKey(to=User,
                              on_delete=models.CASCADE,
                              related_name='recipes')
@@ -122,10 +142,11 @@ class MealPlan(models.Model):
 
 def search_recipes_for_user(user, search_term):
     recipes = get_available_recipes_for_user(Recipe.objects, user)
-    return recipes \
-        .annotate(search=SearchVector('title', 'ingredients__item', 'steps__text', 'tags__tag', 'user__username')) \
-        .filter(search=search_term) \
-        .distinct('pk')
+    recipes = recipes.annotate(search=SearchVector(
+        'title', 'ingredients__item', 'steps__text', 'tags__tag'))
+    recipes = recipes.filter(search=search_term).distinct('pk')
+    # recipes = recipes.filter(title__search=search_term).distinct()
+    return recipes
 
 
 def get_available_recipes_for_user(queryset, user):
