@@ -1,22 +1,22 @@
-from django.shortcuts import render, redirect, get_object_or_404
+import datetime
+
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Min
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from .models import Tag, Recipe, get_available_recipes_for_user
-from django.db.models import Count, Min, Q
+from django.views.generic import DetailView, ListView
+
 from .forms import (
-    RecipeForm,
     IngredientForm,
+    RecipeForm,
     RecipeStepForm,
     make_meal_plan_form_for_user,
 )
-import datetime
-from django.http import JsonResponse
-from django.views import View
-from django.views.generic import ListView, DetailView
-from django.utils.decorators import method_decorator
-
-# Create your views here.
+from .models import Recipe, Tag, get_available_recipes_for_user
 
 
 def homepage(request):
@@ -275,4 +275,3 @@ def copy_recipe(request, recipe_pk):
     cloned_recipe.tags.set(original_recipe.tags.all())
 
     return redirect(to="recipe_detail", recipe_pk=cloned_recipe.pk)
-
