@@ -125,9 +125,9 @@ def toggle_favorite_recipe(request, recipe_pk):
     if recipe in request.user.favorite_recipes.all():
         request.user.favorite_recipes.remove(recipe)
         return JsonResponse({"favorite": False})
-    else:
-        request.user.favorite_recipes.add(recipe)
-        return JsonResponse({"favorite": True})
+
+    request.user.favorite_recipes.add(recipe)
+    return JsonResponse({"favorite": True})
 
 
 @login_required
