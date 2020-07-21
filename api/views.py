@@ -10,14 +10,6 @@ class TestApiView(views.APIView):
         return Response({"ok": True})
 
 
-# class RecipesView(ListCreateAPIView):
-#     queryset = Recipe.objects.filter(public=True)
-#     serializer_class = RecipeSerializer
-
-#     def perform_create(self, serializer):
-#         serializer.save(user=self.request.user)
-
-
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.filter(public=True)
     serializer_class = RecipeSerializer
