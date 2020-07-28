@@ -4,9 +4,8 @@ from django.contrib.postgres.search import SearchVector
 from users.models import User
 from ordered_model.models import OrderedModel
 
-from django.conf import settings
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill, ResizeToFit
 
 
 class Tag(models.Model):
@@ -73,17 +72,23 @@ class Recipe(models.Model):
         to="self", on_delete=models.SET_NULL, null=True, blank=True
     )
     public = models.BooleanField(default=True)
-    favorited_by = models.ManyToManyField(to=User, related_name="favorite_recipes", blank=True)
-
-    photo = models.ImageField(
-        upload_to="recipe_photos/",
-        null=True,
-        blank=True,
-        height_field="photo_height",
-        width_field="photo_width",
+    favorited_by = models.ManyToManyField(
+        to=User, related_name="favorite_recipes", blank=True
     )
-    photo_height = models.PositiveIntegerField(null=True, blank=True)
-    photo_width = models.PositiveIntegerField(null=True, blank=True)
+
+    photo = models.ImageField(upload_to="recipe_photos/", null=True, blank=True,)
+    photo_thumbnail = ImageSpecField(
+        source="photo",
+        processors=[ResizeToFill(200, 200)],
+        format="JPEG",
+        options={"quality": 60},
+    )
+    photo_medium = ImageSpecField(
+        source="photo",
+        processors=[ResizeToFit(400, 400)],
+        format="JPEG",
+        options={"quality": 80},
+    )
 
     def get_tag_names(self):
         tag_names = []

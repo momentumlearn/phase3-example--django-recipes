@@ -14,6 +14,9 @@
 <ul>
   {% for recipe in object_list %}
     <li>
+      {% if recipe.photo %}
+      <img src="{{ recipe.photo_thumbnail.url }}">
+      {% endif %}
       <a href="{% url 'recipe_detail' pk=recipe.pk %}">{{ recipe.title }}</a> (by {{ recipe.user }}) {% if not recipe.public %}<b>private</b>{% endif %}
       -- favorited {{ recipe.times_favorited }} time{{ recipe.times_favorited|pluralize }}
     </li>
