@@ -68,12 +68,22 @@ class Recipe(models.Model):
     title = models.CharField(max_length=255)
     prep_time_in_minutes = models.PositiveIntegerField(null=True, blank=True)
     cook_time_in_minutes = models.PositiveIntegerField(null=True, blank=True)
-    tags = models.ManyToManyField(to=Tag, related_name="recipes")
+    tags = models.ManyToManyField(to=Tag, related_name="recipes", blank=True)
     original_recipe = models.ForeignKey(
         to="self", on_delete=models.SET_NULL, null=True, blank=True
     )
     public = models.BooleanField(default=True)
-    favorited_by = models.ManyToManyField(to=User, related_name="favorite_recipes")
+    favorited_by = models.ManyToManyField(to=User, related_name="favorite_recipes", blank=True)
+
+    photo = models.ImageField(
+        upload_to="recipe_photos/",
+        null=True,
+        blank=True,
+        height_field="photo_height",
+        width_field="photo_width",
+    )
+    photo_height = models.PositiveIntegerField(null=True, blank=True)
+    photo_width = models.PositiveIntegerField(null=True, blank=True)
 
     def get_tag_names(self):
         tag_names = []

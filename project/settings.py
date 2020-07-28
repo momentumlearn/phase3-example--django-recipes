@@ -24,6 +24,9 @@ environ.Env.read_env()
 # Build paths inside the project like this: BASE_DIR / ...
 BASE_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/media/"
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
@@ -51,6 +54,8 @@ INSTALLED_APPS = [
     "registration",
     "ordered_model",
     "rest_framework",
+    "rest_framework.authtoken",
+    "djoser",
     # Project-specific
     "users",
     "recipes",
@@ -144,7 +149,11 @@ LOGIN_REDIRECT_URL = "/"
 
 # DRF settings
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated",]
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated",],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
 }
 
 

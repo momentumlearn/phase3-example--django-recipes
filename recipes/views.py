@@ -61,7 +61,7 @@ def add_recipe(request):
             recipe.user = request.user
             recipe.save()
             recipe.set_tag_names(form.cleaned_data["tag_names"])
-            return redirect(to="recipe_detail", recipe_pk=recipe.pk)
+            return redirect(to="recipe_detail", pk=recipe.pk)
     else:
         form = RecipeForm()
 
@@ -75,13 +75,13 @@ class AddRecipeView(View):
         return render(request, "recipes/add_recipe.html", {"form": form})
 
     def post(self, request):
-        form = RecipeForm(data=request.POST)
+        form = RecipeForm(data=request.POST, files=request.FILES)
         if form.is_valid():
             recipe = form.save(commit=False)
             recipe.user = request.user
             recipe.save()
             recipe.set_tag_names(form.cleaned_data["tag_names"])
-            return redirect(to="recipe_detail", recipe_pk=recipe.pk)
+            return redirect(to="recipe_detail", pk=recipe.pk)
         return render(request, "recipes/add_recipe.html", {"form": form})
 
 
@@ -90,11 +90,11 @@ def edit_recipe(request, recipe_pk):
     recipe = get_object_or_404(request.user.recipes, pk=recipe_pk)
 
     if request.method == "POST":
-        form = RecipeForm(instance=recipe, data=request.POST)
+        form = RecipeForm(instance=recipe, data=request.POST, files=request.FILES)
         if form.is_valid():
             recipe = form.save()
             recipe.set_tag_names(form.cleaned_data["tag_names"])
-            return redirect(to="recipe_detail", recipe_pk=recipe.pk)
+            return redirect(to="recipe_detail", pk=recipe.pk)
     else:
         form = RecipeForm(
             instance=recipe, initial={"tag_names": recipe.get_tag_names()}
@@ -140,7 +140,7 @@ def add_ingredient(request, recipe_pk):
             ingredient = form.save(commit=False)
             ingredient.recipe = recipe
             ingredient.save()
-            return redirect(to="recipe_detail", recipe_pk=recipe.pk)
+            return redirect(to="recipe_detail", pk=recipe.pk)
     else:  # viewing page for first time
         form = IngredientForm()
 

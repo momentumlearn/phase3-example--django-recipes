@@ -17,6 +17,8 @@ import api
 from django.contrib import admin
 from django.conf import settings
 from django.urls import include, path
+from django.conf.urls.static import static
+
 from recipes import views as recipes_views
 from api import views as api_views
 
@@ -72,8 +74,10 @@ urlpatterns = [
     path("accounts/", include("registration.backends.simple.urls")),
     path("api-auth/", include("rest_framework.urls")),
     path("api/test/", api_views.TestApiView.as_view()),
+    path("api/auth/", include("djoser.urls")),
+    path("api/auth/", include("djoser.urls.authtoken")),
     path("api/", include(router.urls)),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     import debug_toolbar

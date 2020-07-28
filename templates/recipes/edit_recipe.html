@@ -4,7 +4,7 @@
 
 <h2>Edit recipe</h2>
 
-<form action="{% url 'edit_recipe' recipe_pk=recipe.pk %}" method="POST">
+<form action="{% url 'edit_recipe' recipe_pk=recipe.pk %}" method="POST" enctype="multipart/form-data">
   {% csrf_token %}
   {{ form.as_p }}
   <div>
