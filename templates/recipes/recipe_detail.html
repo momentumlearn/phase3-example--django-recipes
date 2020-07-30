@@ -34,9 +34,11 @@ Recipe Book - {{ recipe.title }}
   {% endif %}
 </p>
 
+{% if recipe.photo %}
 <div>
   <img src="{{ recipe.photo_medium.url }}" />
 </div>
+{% endif %}
 
 {% if recipe.prep_time_in_minutes %}
   <p><strong>Prep time</strong>: {{ recipe.prep_time_in_minutes }} minutes</p>
