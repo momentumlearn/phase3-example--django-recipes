@@ -71,7 +71,7 @@ urlpatterns = [
     ),
     path("tags/<str:tag_name>/", recipes_views.view_tag, name="view_tag"),
     path("admin/", admin.site.urls),
-    path("accounts/", include("registration.backends.simple.urls")),
+    path("accounts/", include("registration.backends.default.urls")),
     path("api-auth/", include("rest_framework.urls")),
     path("api/test/", api_views.TestApiView.as_view()),
     path("api/auth/", include("djoser.urls")),
