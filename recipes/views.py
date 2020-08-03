@@ -14,6 +14,7 @@ from .forms import (
     IngredientForm,
     RecipeForm,
     RecipeStepForm,
+    IngredientFormset,
     make_meal_plan_form_for_user,
 )
 from .models import Recipe, Tag, get_available_recipes_for_user
@@ -91,16 +92,23 @@ def edit_recipe(request, recipe_pk):
 
     if request.method == "POST":
         form = RecipeForm(instance=recipe, data=request.POST, files=request.FILES)
-        if form.is_valid():
+        ingredient_formset = IngredientFormset(instance=recipe, data=request.POST)
+        if form.is_valid() and ingredient_formset.is_valid():
             recipe = form.save()
             recipe.set_tag_names(form.cleaned_data["tag_names"])
+            ingredient_formset.save()
             return redirect(to="recipe_detail", pk=recipe.pk)
     else:
         form = RecipeForm(
             instance=recipe, initial={"tag_names": recipe.get_tag_names()}
         )
+        ingredient_formset = IngredientFormset(instance=recipe)
 
-    return render(request, "recipes/edit_recipe.html", {"form": form, "recipe": recipe})
+    return render(
+        request,
+        "recipes/edit_recipe.html",
+        {"form": form, "recipe": recipe, "ingredient_formset": ingredient_formset,},
+    )
 
 
 @login_required

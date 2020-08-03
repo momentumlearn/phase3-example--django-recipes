@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import inlineformset_factory
 from .models import Recipe, Ingredient, RecipeStep
 
 
@@ -25,6 +26,17 @@ class RecipeForm(forms.ModelForm):
             "cook_time_in_minutes": forms.NumberInput(attrs={"class": "pa2 f4 w-100"}),
             "photo": forms.FileInput(attrs={"class": "pa2 f4 w-100"}),
         }
+
+
+IngredientFormset = inlineformset_factory(
+    Recipe,
+    Ingredient,
+    fields=("amount", "item",),
+    widgets={
+        "amount": forms.TextInput(attrs={"class": "pa2 f4 w-100"}),
+        "item": forms.TextInput(attrs={"class": "pa2 f4 w-100"}),
+    },
+)
 
 
 class IngredientForm(forms.ModelForm):
