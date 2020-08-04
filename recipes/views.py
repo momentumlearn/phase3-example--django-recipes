@@ -28,11 +28,23 @@ def homepage(request):
 
 
 class RecipeListView(ListView):
+    def get_template_names(self):
+        if self.request.is_ajax():
+            return ["recipes/_recipe_list.html"]
+        else:
+            return ["recipes/recipe_list.html"]
+
     def get_queryset(self):
+        order_field = self.request.GET.get("order", "title")
+
         return (
             Recipe.objects.for_user(self.request.user)
-            .order_by("title")
-            .annotate(times_favorited=Count("favorited_by"))
+            .annotate(
+                times_favorited=Count("favorited_by"),
+                num_ingredients=Count("ingredients"),
+                times_cooked=Count("meal_plans"),
+            )
+            .order_by(order_field)
         )
 
 

@@ -1,0 +1,15 @@
+<ul class="list pl0 flex flex-wrap" id="recipe-list">
+  {% for recipe in object_list %}
+    <li class="ba bw1 pa2 mr2 mb2">
+      {% if recipe.photo %}
+      <div><img src="{{ recipe.photo_thumbnail.url }}"></div>
+      {% endif %}
+      <div>
+        <a href="{% url 'recipe_detail' pk=recipe.pk %}">{{ recipe.title }}</a> (by {{ recipe.user }})
+      </div>
+      <div>{% if not recipe.public %}<b>private</b>{% endif %}</div>
+      <div>favorited {{ recipe.times_favorited }} time{{ recipe.times_favorited|pluralize }}</div>
+      <div>cooked {{ recipe.times_cooked }} time{{ recipe.times_cooked|pluralize }}</div>
+    </li>
+  {% endfor %}
+</ul>
