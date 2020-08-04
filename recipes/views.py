@@ -2,7 +2,7 @@ import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Min
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -73,17 +73,31 @@ def add_recipe(request):
 class AddRecipeView(View):
     def get(self, request):
         form = RecipeForm()
-        return render(request, "recipes/add_recipe.html", {"form": form})
+        ingredient_formset = IngredientFormset()
+        return render(
+            request,
+            "recipes/add_recipe.html",
+            {"form": form, "ingredient_formset": ingredient_formset},
+        )
 
     def post(self, request):
         form = RecipeForm(data=request.POST, files=request.FILES)
-        if form.is_valid():
+        ingredient_formset = IngredientFormset(data=request.POST)
+        if form.is_valid() and ingredient_formset.is_valid():
             recipe = form.save(commit=False)
             recipe.user = request.user
             recipe.save()
             recipe.set_tag_names(form.cleaned_data["tag_names"])
+            ingredients = ingredient_formset.save(commit=False)
+            for ingredient in ingredients:
+                ingredient.recipe = recipe
+                ingredient.save()
             return redirect(to="recipe_detail", pk=recipe.pk)
-        return render(request, "recipes/add_recipe.html", {"form": form})
+        return render(
+            request,
+            "recipes/add_recipe.html",
+            {"form": form, "ingredient_formset": ingredient_formset},
+        )
 
 
 @login_required
@@ -219,29 +233,46 @@ def show_meal_plan(request, year, month, day):
 
     # https://docs.djangoproject.com/en/3.0/ref/models/querysets/#get-or-create
     meal_plan, _ = request.user.meal_plans.get_or_create(date=date_for_plan)
+    recipes = Recipe.objects.for_user(request.user).exclude(
+        pk__in=[r.pk for r in meal_plan.recipes.all()]
+    )
 
-    if request.method == "POST":
-        form = make_meal_plan_form_for_user(user=request.user, data=request.POST)
-
-        if form.is_valid():
-            recipe = request.user.recipes.get(pk=form.cleaned_data["recipe"])
-            meal_plan.recipes.add(recipe)
-        else:
-            print(form.errors)
-
-    form = make_meal_plan_form_for_user(user=request.user)
+    # if request.method == "POST":
+    #     if form.is_valid():
+    #         recipe = request.user.recipes.get(pk=form.cleaned_data["recipe"])
+    #         meal_plan.recipes.add(recipe)
+    #     else:
+    #         print(form.errors)
 
     return render(
         request,
         "recipes/show_meal_plan.html",
         {
             "plan": meal_plan,
+            "recipes": recipes,
             "date": date_for_plan,
-            "form": form,
             "next_day": next_day,
             "prev_day": prev_day,
         },
     )
+
+
+@login_required
+@csrf_exempt
+def meal_plan_add_remove_recipe(request):
+    date = request.POST.get("date")
+    recipe_pk = request.POST.get("pk")
+    action = request.POST.get("action")
+
+    meal_plan, _ = request.user.meal_plans.get_or_create(date=date)
+    recipe = Recipe.objects.for_user(request.user).get(pk=recipe_pk)
+
+    if action == "add":
+        meal_plan.recipes.add(recipe)
+    elif action == "remove":
+        meal_plan.recipes.remove(recipe)
+
+    return HttpResponse(status=204)
 
 
 @login_required

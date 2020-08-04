@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from recipes.views import meal_plan_add_remove_recipe
 import api
 from django.contrib import admin
 from django.conf import settings
@@ -69,6 +70,7 @@ urlpatterns = [
         recipes_views.show_meal_plan,
         name="show_meal_plan",
     ),
+    path("mealplan/add-remove/", recipes_views.meal_plan_add_remove_recipe),
     path("tags/<str:tag_name>/", recipes_views.view_tag, name="view_tag"),
     path("admin/", admin.site.urls),
     path("accounts/", include("registration.backends.default.urls")),

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,22 +7,7 @@
   {% block meta %}{% endblock %}
   <title>{% block title %}Recipe Book{% endblock %}</title>
   <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
-  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-  {% block scripts %}{% endblock %}
-  <script>
-    // function random(x) {
-    //   return Math.floor(Math.random() * x)
-    // }
-    // function changeLinkColor () {
-    //   $("a").css('color', `rgb(${random(256)}, ${random(256)}, ${random(256)})`)
-
-    //   setTimeout(changeLinkColor, 2000)
-    // }
-
-    // changeLinkColor()
-
-  </script>
-
+  <link rel="stylesheet" href="{% static 'vendor/dragula/dragula.min.css' %}">
 </head>
 <body class="sans-serif">
   <div class="mw8 center ph3 pv4">
@@ -37,6 +23,10 @@
     {% block content %}
     {% endblock %}
   </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script src="{% static 'vendor/dragula/dragula.min.js' %}"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>
 
