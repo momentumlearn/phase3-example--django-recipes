@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.postgres",
+    # "django.contrib.postgres",
     # Third-party
     "debug_toolbar",
     "django_extensions",
@@ -185,9 +185,3 @@ if env("USE_S3"):
         "CacheControl": "max-age=86400",
     }
     DEFAULT_FILE_STORAGE = "project.storage_backends.MediaStorage"
-
-# Configure Django App for Heroku.
-import django_heroku
-
-django_heroku.settings(locals())
-del DATABASES["default"]["OPTIONS"]["sslmode"]

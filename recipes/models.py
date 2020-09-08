@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import Q
-from django.contrib.postgres.search import SearchVector
+# from django.contrib.postgres.search import SearchVector
 from users.models import User
 from ordered_model.models import OrderedModel
 
@@ -47,14 +47,14 @@ class RecipeQuerySet(models.QuerySet):
             recipes = self.filter(public=True)
         return recipes
 
-    def search(self, search_term):
-        recipes = self.annotate(
-            search=SearchVector(
-                "title", "ingredients__item", "steps__text", "tags__tag"
-            )
-        )
-        recipes = recipes.filter(search=search_term).distinct("pk")
-        return recipes
+    # def search(self, search_term):
+    #     recipes = self.annotate(
+    #         search=SearchVector(
+    #             "title", "ingredients__item", "steps__text", "tags__tag"
+    #         )
+    #     )
+    #     recipes = recipes.filter(search=search_term).distinct("pk")
+    #     return recipes
 
     def public(self):
         return self.filter(public=True)
