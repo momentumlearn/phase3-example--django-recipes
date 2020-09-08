@@ -4,10 +4,6 @@ from django.db.models import Q
 from users.models import User
 from ordered_model.models import OrderedModel
 
-from imagekit.models import ImageSpecField
-from imagekit.processors import ResizeToFill, ResizeToFit
-
-
 class Tag(models.Model):
     tag = models.CharField(max_length=100, unique=True)
 
@@ -74,20 +70,6 @@ class Recipe(models.Model):
     public = models.BooleanField(default=True)
     favorited_by = models.ManyToManyField(
         to=User, related_name="favorite_recipes", blank=True
-    )
-
-    photo = models.ImageField(upload_to="recipe_photos/", null=True, blank=True,)
-    photo_thumbnail = ImageSpecField(
-        source="photo",
-        processors=[ResizeToFill(200, 200)],
-        format="JPEG",
-        options={"quality": 60},
-    )
-    photo_medium = ImageSpecField(
-        source="photo",
-        processors=[ResizeToFit(400, 400)],
-        format="JPEG",
-        options={"quality": 80},
     )
 
     def get_tag_names(self):
