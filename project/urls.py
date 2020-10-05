@@ -13,20 +13,11 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from recipes.views import meal_plan_add_remove_recipe
-import api
 from django.contrib import admin
 from django.conf import settings
 from django.urls import include, path
-from django.conf.urls.static import static
 
 from recipes import views as recipes_views
-from api import views as api_views
-
-from rest_framework.routers import DefaultRouter
-
-router = DefaultRouter()
-router.register(r"recipes", api_views.RecipeViewSet, basename="recipes")
 
 urlpatterns = [
     path("", recipes_views.homepage, name="homepage"),
@@ -52,7 +43,7 @@ urlpatterns = [
         recipes_views.toggle_favorite_recipe,
         name="toggle_favorite_recipe",
     ),
-    path("recipes/new/", recipes_views.AddRecipeView.as_view(), name="add_recipe"),
+    path("recipes/new/", recipes_views.add_recipe, name="add_recipe"),
     path(
         "recipes/<int:recipe_pk>/add_ingredient/",
         recipes_views.add_ingredient,
@@ -73,13 +64,8 @@ urlpatterns = [
     path("mealplan/add-remove/", recipes_views.meal_plan_add_remove_recipe),
     path("tags/<str:tag_name>/", recipes_views.view_tag, name="view_tag"),
     path("admin/", admin.site.urls),
-    path("accounts/", include("registration.backends.default.urls")),
-    path("api-auth/", include("rest_framework.urls")),
-    path("api/test/", api_views.TestApiView.as_view()),
-    path("api/auth/", include("djoser.urls")),
-    path("api/auth/", include("djoser.urls.authtoken")),
-    path("api/", include(router.urls)),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path("accounts/", include("registration.backends.simple.urls")),
+]
 
 if settings.DEBUG:
     import debug_toolbar

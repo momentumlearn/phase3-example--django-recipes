@@ -4,8 +4,6 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Min
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.decorators import method_decorator
-from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView
@@ -15,9 +13,8 @@ from .forms import (
     RecipeForm,
     RecipeStepForm,
     IngredientFormset,
-    make_meal_plan_form_for_user,
 )
-from .models import Recipe, Tag, get_available_recipes_for_user
+from .models import Recipe, Tag
 
 
 def homepage(request):
@@ -69,32 +66,8 @@ class RecipeDetailView(DetailView):
 def add_recipe(request):
     if request.method == "POST":
         form = RecipeForm(data=request.POST)
-        if form.is_valid():
-            recipe = form.save(commit=False)
-            recipe.user = request.user
-            recipe.save()
-            recipe.set_tag_names(form.cleaned_data["tag_names"])
-            return redirect(to="recipe_detail", pk=recipe.pk)
-    else:
-        form = RecipeForm()
-
-    return render(request, "recipes/add_recipe.html", {"form": form})
-
-
-@method_decorator(login_required, name="dispatch")
-class AddRecipeView(View):
-    def get(self, request):
-        form = RecipeForm()
-        ingredient_formset = IngredientFormset()
-        return render(
-            request,
-            "recipes/add_recipe.html",
-            {"form": form, "ingredient_formset": ingredient_formset},
-        )
-
-    def post(self, request):
-        form = RecipeForm(data=request.POST, files=request.FILES)
         ingredient_formset = IngredientFormset(data=request.POST)
+
         if form.is_valid() and ingredient_formset.is_valid():
             recipe = form.save(commit=False)
             recipe.user = request.user
@@ -105,11 +78,15 @@ class AddRecipeView(View):
                 ingredient.recipe = recipe
                 ingredient.save()
             return redirect(to="recipe_detail", pk=recipe.pk)
-        return render(
-            request,
-            "recipes/add_recipe.html",
-            {"form": form, "ingredient_formset": ingredient_formset},
-        )
+    else:
+        form = RecipeForm()
+        ingredient_formset = IngredientFormset()
+
+    return render(
+        request,
+        "recipes/add_recipe.html",
+        {"form": form, "ingredient_formset": ingredient_formset},
+    )
 
 
 @login_required
@@ -133,7 +110,11 @@ def edit_recipe(request, recipe_pk):
     return render(
         request,
         "recipes/edit_recipe.html",
-        {"form": form, "recipe": recipe, "ingredient_formset": ingredient_formset,},
+        {
+            "form": form,
+            "recipe": recipe,
+            "ingredient_formset": ingredient_formset,
+        },
     )
 
 
@@ -152,9 +133,7 @@ def delete_recipe(request, recipe_pk):
 @csrf_exempt
 @require_POST
 def toggle_favorite_recipe(request, recipe_pk):
-    recipe = get_object_or_404(
-        get_available_recipes_for_user(Recipe.objects, request.user), pk=recipe_pk
-    )
+    recipe = get_object_or_404(Recipe.objects.for_user(request.user), pk=recipe_pk)
 
     if recipe in request.user.favorite_recipes.all():
         request.user.favorite_recipes.remove(recipe)
@@ -249,13 +228,6 @@ def show_meal_plan(request, year, month, day):
         pk__in=[r.pk for r in meal_plan.recipes.all()]
     )
 
-    # if request.method == "POST":
-    #     if form.is_valid():
-    #         recipe = request.user.recipes.get(pk=form.cleaned_data["recipe"])
-    #         meal_plan.recipes.add(recipe)
-    #     else:
-    #         print(form.errors)
-
     return render(
         request,
         "recipes/show_meal_plan.html",
@@ -297,7 +269,10 @@ def show_random_recipe(request):
     return render(
         request,
         "recipes/recipe_detail.html",
-        {"recipe": recipe, "ingredient_form": ingredient_form,},
+        {
+            "recipe": recipe,
+            "ingredient_form": ingredient_form,
+        },
     )
 
 

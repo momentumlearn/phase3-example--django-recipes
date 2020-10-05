@@ -1,8 +1,8 @@
 from django.db import models
 from django.db.models import Q
-# from django.contrib.postgres.search import SearchVector
 from users.models import User
 from ordered_model.models import OrderedModel
+
 
 class Tag(models.Model):
     tag = models.CharField(max_length=100, unique=True)
@@ -12,8 +12,8 @@ class Tag(models.Model):
 
 
 def make_fake_recipe(user):
-    from faker import Faker
     import random
+    from faker import Faker
 
     f = Faker()
     recipe = Recipe(
@@ -42,15 +42,6 @@ class RecipeQuerySet(models.QuerySet):
         else:
             recipes = self.filter(public=True)
         return recipes
-
-    # def search(self, search_term):
-    #     recipes = self.annotate(
-    #         search=SearchVector(
-    #             "title", "ingredients__item", "steps__text", "tags__tag"
-    #         )
-    #     )
-    #     recipes = recipes.filter(search=search_term).distinct("pk")
-    #     return recipes
 
     def public(self):
         return self.filter(public=True)
@@ -137,21 +128,3 @@ class MealPlan(models.Model):
             "user",
             "date",
         ]
-
-
-def search_recipes_for_user(user, search_term):
-    recipes = get_available_recipes_for_user(Recipe.objects, user)
-    recipes = recipes.annotate(
-        search=SearchVector("title", "ingredients__item", "steps__text", "tags__tag")
-    )
-    recipes = recipes.filter(search=search_term).distinct("pk")
-    # recipes = recipes.filter(title__search=search_term).distinct()
-    return recipes
-
-
-def get_available_recipes_for_user(queryset, user):
-    if user.is_authenticated:
-        recipes = queryset.filter(Q(public=True) | Q(user=user))
-    else:
-        recipes = queryset.filter(public=True)
-    return recipes
