@@ -38,6 +38,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "registration",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -48,7 +49,6 @@ INSTALLED_APPS = [
     # Third-party
     "debug_toolbar",
     "django_extensions",
-    "registration",
     "ordered_model",
     # Project-specific
     "users",
@@ -149,5 +149,6 @@ LOGIN_REDIRECT_URL = "/"
 
 # Configure Django App for Heroku.
 import django_heroku
+
 django_heroku.settings(locals())
-del DATABASES['default']['OPTIONS']['sslmode']
+del DATABASES["default"]["OPTIONS"]["sslmode"]
