@@ -11,21 +11,20 @@
   <a href="{% url 'add_recipe' %}">Add new recipe</a>
 </p>
 
-<!--
 <ul class="list pl0 flex">
   <li class="mr2">Order by</li>
   <li class="mr2"><a class="order-link" href="{% url 'recipe_list' %}?order=title">Title</a></li>
   <li class="mr2"><a class="order-link" href="{% url 'recipe_list' %}?order=-times_favorited">Times favorited</a></li>
   <li class="mr2"><a class="order-link" href="{% url 'recipe_list' %}?order=-times_cooked">Times cooked</a></li>
+  <li class="mr2"><a class="order-link" href="{% url 'recipe_list' %}?order=total_time_in_minutes">Total time to make</a></li>
 </ul>
--->
 
 {% include "recipes/_recipe_list.html" %}
 
 {% endblock %}
 
 {% block scripts %}
-<script>
+<!-- <script>
   $('.order-link').on('click', function (event) {
     event.preventDefault()
     fetch(event.target.href, {
@@ -38,5 +37,5 @@
       $("#recipe-list").replaceWith(body)
     })
   })
-</script>
+</script> -->
 {% endblock %}

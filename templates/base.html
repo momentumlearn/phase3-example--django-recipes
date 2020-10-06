@@ -13,8 +13,9 @@
   <div class="mw8 center ph3 pv4">
     <div class="pa3 bg-light-green black">
       <h1 class="ma0"><a class="black no-underline" href="{% url 'homepage' %}">Recipe Book</a></h1>
-      {% if user.is_authenticated %}
+
       <div class="flex justify-between">
+        {% if user.is_authenticated %}
         <div class="mr2">
           Hello, {{ user.username }}!
           <a href="{% url 'auth_logout' %}">Logout</a>
@@ -25,8 +26,12 @@
         <div class="mr2">
           <a href="{% url 'todays_meal_plan' %}">Today's meal plan</a>
         </div>
+        {% endif %}
+        <div class="mr2">
+          <a href="{% url 'search_recipes' %}">Search recipes</a>
+        </div>
       </div>
-      {% endif %}
+
     </div>
     {% block content %}
     {% endblock %}

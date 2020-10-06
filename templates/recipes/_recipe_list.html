@@ -5,8 +5,9 @@
         <a href="{% url 'recipe_detail' pk=recipe.pk %}">{{ recipe.title }}</a> (by {{ recipe.user }})
       </div>
       <div>{% if not recipe.public %}<b>private</b>{% endif %}</div>
-      <!-- <div>favorited {{ recipe.times_favorited }} time{{ recipe.times_favorited|pluralize }}</div>
-      <div>cooked {{ recipe.times_cooked }} time{{ recipe.times_cooked|pluralize }}</div> -->
+      <div>favorited {{ recipe.times_favorited }} time{{ recipe.times_favorited|pluralize }}</div>
+      <div>cooked {{ recipe.times_cooked }} time{{ recipe.times_cooked|pluralize }}</div>
+      <div>{{ recipe.total_time_in_minutes }} minutes to make</div>
     </li>
   {% endfor %}
 </ul>

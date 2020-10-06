@@ -42,11 +42,11 @@ Recipe Book - {{ recipe.title }}
   <p><strong>Cook time</strong>: {{ recipe.cook_time_in_minutes }} minutes</p>
 {% endif %}
 
-<!-- <p><strong>Times cooked</strong>: {{ recipe.times_cooked }}</p>
+<p><strong>Times cooked</strong>: {{ recipe.times_cooked }}</p>
 
 {% if recipe.first_cooked %}
   <p><strong>First cooked</strong>: {{ recipe.first_cooked }}</p>
-{% endif %} -->
+{% endif %}
 
 {% if recipe.tags.count > 0 %}
 <ul class="list pl0">
@@ -56,7 +56,7 @@ Recipe Book - {{ recipe.title }}
 </ul>
 {% endif %}
 
-<h3>Ingredients <!-- ({{ recipe.num_ingredients }}) --></h3>
+<h3>Ingredients ({{ recipe.num_ingredients }})</h3>
 
 <ul>
   {% for ingredient in recipe.ingredients.all %}

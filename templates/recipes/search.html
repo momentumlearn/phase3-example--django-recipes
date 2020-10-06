@@ -5,7 +5,7 @@
 <h1>Search recipes</h1>
 
 <form action="{% url 'search_recipes' %}" method="GET">
-  <input type="search" name="q" placeholder="Search all recipes" class="pa2 w-100" value="{{ query }}">
+  <input type="search" name="q" placeholder="Search all recipes" class="pa2 w-100" value="{{ search_term }}">
   <p>
     <button type="submit">Search</button>
   </p>
@@ -14,7 +14,7 @@
 {% if recipes is not None %}
 <ul>
   {% for recipe in recipes %}
-    <li><a href="{% url 'recipe_detail' recipe_pk=recipe.pk %}">{{ recipe.title }}</a></li>
+    <li><a href="{% url 'recipe_detail' pk=recipe.pk %}">{{ recipe.title }}</a></li>
   {% empty %}
     <li>There are no recipes that match that query.</li>
   {% endfor %}

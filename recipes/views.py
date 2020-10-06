@@ -1,7 +1,7 @@
 import datetime
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Min
+from django.db.models import Count, Min, F, Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
@@ -26,7 +26,15 @@ def homepage(request):
 
 def recipe_list(request):
     order_field = request.GET.get("order", "title")
-    recipes = Recipe.objects.for_user(request.user).order_by(order_field)
+    recipes = (
+        Recipe.objects.for_user(request.user)
+        .annotate(
+            times_favorited=Count("favorited_by", distinct=True),
+            times_cooked=Count("meal_plans", distinct=True),
+            total_time_in_minutes=F("prep_time_in_minutes") + F("cook_time_in_minutes"),
+        )
+        .order_by(order_field)
+    )
 
     if request.is_ajax():
         template_name = "recipes/_recipe_list.html"
@@ -37,7 +45,12 @@ def recipe_list(request):
 
 
 def recipe_detail(request, pk):
-    recipes = Recipe.objects.for_user(request.user)
+    recipes = Recipe.objects.for_user(request.user).annotate(
+        num_ingredients=Count("ingredients", distinct=True),
+        times_cooked=Count("meal_plans", distinct=True),
+        first_cooked=Min("meal_plans__date"),
+    )
+
     recipe = get_object_or_404(recipes, pk=pk)
     return render(
         request,
@@ -47,6 +60,22 @@ def recipe_detail(request, pk):
             "is_user_favorite": request.user.is_favorite_recipe(recipe),
             "ingredient_form": IngredientForm(),
         },
+    )
+
+
+def recipe_search(request):
+    search_term = request.GET.get("q")
+    if search_term:
+        recipes = Recipe.objects.filter(
+            Q(title__icontains=search_term)
+            | Q(ingredients__item__icontains=search_term)
+            | Q(tags__tag__iexact=search_term)
+        ).distinct()
+    else:
+        recipes = None
+
+    return render(
+        request, "recipes/search.html", {"recipes": recipes, "search_term": search_term}
     )
 
 
