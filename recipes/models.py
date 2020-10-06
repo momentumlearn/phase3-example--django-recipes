@@ -2,6 +2,8 @@ from django.db import models
 from django.db.models import Q
 from users.models import User
 from ordered_model.models import OrderedModel
+import random
+from faker import Faker
 
 
 class Tag(models.Model):
@@ -12,9 +14,6 @@ class Tag(models.Model):
 
 
 def make_fake_recipe(user):
-    import random
-    from faker import Faker
-
     f = Faker()
     recipe = Recipe(
         title=(" ".join(f.words(3))),
