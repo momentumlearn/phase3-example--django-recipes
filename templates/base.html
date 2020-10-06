@@ -11,12 +11,20 @@
 </head>
 <body class="sans-serif">
   <div class="mw8 center ph3 pv4">
-    <div class="pa2 bg-dark-red white">
-      <h1><a class="white no-underline" href="{% url 'homepage' %}">Recipe Book</a></h1>
+    <div class="pa3 bg-light-green black">
+      <h1 class="ma0"><a class="black no-underline" href="{% url 'homepage' %}">Recipe Book</a></h1>
       {% if user.is_authenticated %}
-      <div>
-        Hello, {{ user.username }}!
-        <a href="{% url 'auth_logout' %}">Logout</a>
+      <div class="flex justify-between">
+        <div class="mr2">
+          Hello, {{ user.username }}!
+          <a href="{% url 'auth_logout' %}">Logout</a>
+        </div>
+        <div class="mr2">
+          <a href="{% url 'add_recipe' %}">Add a recipe</a>
+        </div>
+        <div class="mr2">
+          <a href="{% url 'todays_meal_plan' %}">Today's meal plan</a>
+        </div>
       </div>
       {% endif %}
     </div>

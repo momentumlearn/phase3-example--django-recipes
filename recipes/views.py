@@ -181,24 +181,8 @@ def view_tag(request, tag_name):
     return render(request, "recipes/tag_detail.html", {"tag": tag, "recipes": recipes})
 
 
-def search_recipes(request):
-    """
-    Show a search form. If the user has submitted the form, show the results of the search.
-    """
-    query = request.GET.get("q")
-
-    if query is not None:
-        recipes = Recipe.objects.search(query).for_user(request.user).public()
-    else:
-        recipes = None
-
-    return render(
-        request, "recipes/search.html", {"recipes": recipes, "query": query or ""}
-    )
-
-
 @login_required
-def show_meal_plan(request, year, month, day):
+def show_meal_plan(request, year=None, month=None, day=None):
     """
     Given a year, month, and day, look up the meal plan for the current user for that
     day and display it.
@@ -206,7 +190,10 @@ def show_meal_plan(request, year, month, day):
     If a form is submitted to add a recipe, then go ahead and add recipe to the
     meal plan for that day.
     """
-    date_for_plan = datetime.date(year, month, day)
+    if year is None:
+        date_for_plan = datetime.date.today()
+    else:
+        date_for_plan = datetime.date(year, month, day)
     next_day = date_for_plan + datetime.timedelta(days=1)
     prev_day = date_for_plan + datetime.timedelta(days=-1)
 

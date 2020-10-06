@@ -54,8 +54,8 @@ urlpatterns = [
         recipes_views.add_recipe_step,
         name="add_recipe_step",
     ),
-    path("recipes/search/", recipes_views.search_recipes, name="search_recipes"),
     path("recipes/random/", recipes_views.show_random_recipe, name="random_recipe"),
+    path("mealplan/", recipes_views.show_meal_plan, name="todays_meal_plan"),
     path(
         "mealplan/<int:year>/<int:month>/<int:day>/",
         recipes_views.show_meal_plan,
