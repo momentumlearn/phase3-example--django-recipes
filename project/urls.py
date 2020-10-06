@@ -21,10 +21,10 @@ from recipes import views as recipes_views
 
 urlpatterns = [
     path("", recipes_views.homepage, name="homepage"),
-    path("recipes/", recipes_views.RecipeListView.as_view(), name="recipe_list"),
+    path("recipes/", recipes_views.recipe_list, name="recipe_list"),
     path(
         "recipes/<int:pk>/",
-        recipes_views.RecipeDetailView.as_view(),
+        recipes_views.recipe_detail,
         name="recipe_detail",
     ),
     path(

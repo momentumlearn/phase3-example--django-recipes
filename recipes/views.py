@@ -24,42 +24,30 @@ def homepage(request):
     return render(request, "recipes/home.html")
 
 
-class RecipeListView(ListView):
-    def get_template_names(self):
-        if self.request.is_ajax():
-            return ["recipes/_recipe_list.html"]
-        else:
-            return ["recipes/recipe_list.html"]
+def recipe_list(request):
+    order_field = request.GET.get("order", "title")
+    recipes = Recipe.objects.for_user(request.user).order_by(order_field)
 
-    def get_queryset(self):
-        order_field = self.request.GET.get("order", "title")
+    if request.is_ajax():
+        template_name = "recipes/_recipe_list.html"
+    else:
+        template_name = "recipes/recipe_list.html"
 
-        return (
-            Recipe.objects.for_user(self.request.user)
-            .annotate(
-                times_favorited=Count("favorited_by"),
-                num_ingredients=Count("ingredients"),
-                times_cooked=Count("meal_plans"),
-            )
-            .order_by(order_field)
-        )
+    return render(request, template_name, {"recipes": recipes})
 
 
-class RecipeDetailView(DetailView):
-    def get_queryset(self):
-        recipes = Recipe.objects.for_user(self.request.user)
-        recipes = recipes.annotate(
-            num_ingredients=Count("ingredients"),
-            times_cooked=Count("meal_plans"),
-            first_cooked=Min("meal_plans__date"),
-        )
-        return recipes
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["is_user_favorite"] = self.request.user.is_favorite_recipe(self.object)
-        context["ingredient_form"] = IngredientForm()
-        return context
+def recipe_detail(request, pk):
+    recipes = Recipe.objects.for_user(request.user)
+    recipe = get_object_or_404(recipes, pk=pk)
+    return render(
+        request,
+        "recipes/recipe_detail.html",
+        {
+            "recipe": recipe,
+            "is_user_favorite": request.user.is_favorite_recipe(recipe),
+            "ingredient_form": IngredientForm(),
+        },
+    )
 
 
 @login_required
