@@ -89,6 +89,15 @@ class Recipe(models.Model):
             return None
         return self.cook_time_in_minutes + self.prep_time_in_minutes
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "prep_time_in_minutes": self.prep_time_in_minutes,
+            "cook_time_in_minutes": self.cook_time_in_minutes,
+            "public": self.public,
+        }
+
     def __str__(self):
         return self.title
 

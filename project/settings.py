@@ -18,6 +18,7 @@ import environ
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, False),
+    USE_EMAIL=(bool, False),
 )
 environ.Env.read_env()
 
@@ -146,6 +147,18 @@ INTERNAL_IPS = [
 
 ACCOUNT_ACTIVATION_DAYS = 7
 LOGIN_REDIRECT_URL = "/"
+
+# Email settings
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+if env("USE_EMAIL"):
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = env("EMAIL_HOST")
+    EMAIL_PORT = env("EMAIL_PORT")
+    EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+    EMAIL_USE_TLS = env("EMAIL_USE_TLS")
 
 # Configure Django App for Heroku.
 import django_heroku

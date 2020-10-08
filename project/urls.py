@@ -13,7 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from recipes.views import recipe_search
 from django.contrib import admin
 from django.conf import settings
 from django.urls import include, path
@@ -24,6 +23,11 @@ urlpatterns = [
     path("", recipes_views.homepage, name="homepage"),
     path("recipes/", recipes_views.recipe_list, name="recipe_list"),
     path("recipes/search/", recipes_views.recipe_search, name="search_recipes"),
+    path(
+        "recipes/search/json/",
+        recipes_views.recipe_search_json,
+        name="search_recipes_json",
+    ),
     path(
         "recipes/<int:pk>/",
         recipes_views.recipe_detail,
@@ -66,7 +70,7 @@ urlpatterns = [
     path("mealplan/add-remove/", recipes_views.meal_plan_add_remove_recipe),
     path("tags/<str:tag_name>/", recipes_views.view_tag, name="view_tag"),
     path("admin/", admin.site.urls),
-    path("accounts/", include("registration.backends.simple.urls")),
+    path("accounts/", include("registration.backends.default.urls")),
 ]
 
 if settings.DEBUG:

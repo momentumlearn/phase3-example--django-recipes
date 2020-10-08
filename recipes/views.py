@@ -6,7 +6,7 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.views.generic import DetailView, ListView
+from django.contrib.postgres.search import SearchVector
 
 from .forms import (
     IngredientForm,
@@ -65,18 +65,32 @@ def recipe_detail(request, pk):
 
 def recipe_search(request):
     search_term = request.GET.get("q")
+
     if search_term:
-        recipes = Recipe.objects.filter(
-            Q(title__icontains=search_term)
-            | Q(ingredients__item__icontains=search_term)
-            | Q(tags__tag__iexact=search_term)
-        ).distinct()
+        recipes = Recipe.objects.for_user(request.user).annotate(
+            search=SearchVector(
+                "title", "ingredients__item", "tags__tag", "steps__text"
+            )
+        )
+        recipes = recipes.filter(search=search_term).distinct("id")
     else:
         recipes = None
 
     return render(
-        request, "recipes/search.html", {"recipes": recipes, "search_term": search_term}
+        request,
+        "recipes/search.html",
+        {"recipes": recipes, "search_term": search_term or ""},
     )
+
+
+def recipe_search_json(request):
+    search_term = request.GET.get("q")
+    recipes = Recipe.objects.for_user(request.user).annotate(
+        search=SearchVector("title", "ingredients__item", "tags__tag", "steps__text")
+    )
+    recipes = recipes.filter(search=search_term).distinct("id")
+
+    return JsonResponse({"results": [recipe.to_dict() for recipe in recipes]})
 
 
 @login_required
