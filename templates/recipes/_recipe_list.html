@@ -2,7 +2,7 @@
   {% for recipe in recipes %}
     <li class="ba bw1 pa2 mr2 mb2">
       <div>
-        <a href="{% url 'recipe_detail' pk=recipe.pk %}">{{ recipe.title }}</a> (by {{ recipe.user }})
+        <a href="{% url 'recipe_detail' recipe_pk=recipe.pk %}">{{ recipe.title }}</a> (by {{ recipe.user }})
       </div>
       <div>{% if not recipe.public %}<b>private</b>{% endif %}</div>
       <div>favorited {{ recipe.times_favorited }} time{{ recipe.times_favorited|pluralize }}</div>

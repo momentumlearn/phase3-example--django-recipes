@@ -23,7 +23,7 @@ urlpatterns = [
     path("", recipes_views.homepage, name="homepage"),
     path("recipes/", recipes_views.recipe_list, name="recipe_list"),
     path(
-        "recipes/<int:pk>/",
+        "recipes/<int:recipe_pk>/",
         recipes_views.recipe_detail,
         name="recipe_detail",
     ),

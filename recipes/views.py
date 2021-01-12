@@ -40,14 +40,14 @@ def recipe_list(request):
     return render(request, template_name, {"recipes": recipes})
 
 
-def recipe_detail(request, pk):
+def recipe_detail(request, recipe_pk):
     recipes = Recipe.objects.for_user(request.user).annotate(
         num_ingredients=Count("ingredients", distinct=True),
         times_cooked=Count("meal_plans", distinct=True),
         first_cooked=Min("meal_plans__date"),
     )
 
-    recipe = get_object_or_404(recipes, pk=pk)
+    recipe = get_object_or_404(recipes, pk=recipe_pk)
     return render(
         request,
         "recipes/recipe_detail.html",
@@ -74,7 +74,7 @@ def add_recipe(request):
             for ingredient in ingredients:
                 ingredient.recipe = recipe
                 ingredient.save()
-            return redirect(to="recipe_detail", pk=recipe.pk)
+            return redirect(to="recipe_detail", recipe_pk=recipe.pk)
     else:
         form = RecipeForm()
         ingredient_formset = IngredientFormset()
