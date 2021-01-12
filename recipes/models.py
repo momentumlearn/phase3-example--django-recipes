@@ -1,9 +1,12 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Q
-from users.models import User
 from ordered_model.models import OrderedModel
-import random
-from faker import Faker
+
+
+class User(AbstractUser):
+    def is_favorite_recipe(self, recipe):
+        return self.favorite_recipes.filter(pk=recipe.pk).count() == 1
 
 
 class Tag(models.Model):
@@ -11,27 +14,6 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.tag
-
-
-def make_fake_recipe(user):
-    f = Faker()
-    recipe = Recipe(
-        title=(" ".join(f.words(3))),
-        user=user,
-        prep_time_in_minutes=random.randint(10, 60),
-        cook_time_in_minutes=random.randint(10, 120),
-        public=(random.random() < 0.8),
-    )
-    recipe.save()
-    for _ in range(random.randint(2, 8)):
-        ingredient = Ingredient(
-            recipe=recipe, amount=str(random.randint(1, 10)), item=f.word()
-        )
-        ingredient.save()
-    for i in range(random.randint(3, 6)):
-        step = RecipeStep(recipe=recipe, text=f.paragraph())
-        step.order = i + 1
-        step.save()
 
 
 class RecipeQuerySet(models.QuerySet):
@@ -49,18 +31,21 @@ class RecipeQuerySet(models.QuerySet):
 class Recipe(models.Model):
     objects = RecipeQuerySet.as_manager()
 
-    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="recipes")
+    user = models.ForeignKey(to=User,
+                             on_delete=models.CASCADE,
+                             related_name="recipes")
     title = models.CharField(max_length=255)
     prep_time_in_minutes = models.PositiveIntegerField(null=True, blank=True)
     cook_time_in_minutes = models.PositiveIntegerField(null=True, blank=True)
     tags = models.ManyToManyField(to=Tag, related_name="recipes", blank=True)
-    original_recipe = models.ForeignKey(
-        to="self", on_delete=models.SET_NULL, null=True, blank=True
-    )
+    original_recipe = models.ForeignKey(to="self",
+                                        on_delete=models.SET_NULL,
+                                        null=True,
+                                        blank=True)
     public = models.BooleanField(default=True)
-    favorited_by = models.ManyToManyField(
-        to=User, related_name="favorite_recipes", blank=True
-    )
+    favorited_by = models.ManyToManyField(to=User,
+                                          related_name="favorite_recipes",
+                                          blank=True)
 
     def get_tag_names(self):
         tag_names = []
@@ -103,9 +88,9 @@ class Recipe(models.Model):
 
 
 class Ingredient(models.Model):
-    recipe = models.ForeignKey(
-        to=Recipe, on_delete=models.CASCADE, related_name="ingredients"
-    )
+    recipe = models.ForeignKey(to=Recipe,
+                               on_delete=models.CASCADE,
+                               related_name="ingredients")
     amount = models.CharField(max_length=20)
     item = models.CharField(max_length=255)
 
@@ -114,9 +99,9 @@ class Ingredient(models.Model):
 
 
 class RecipeStep(OrderedModel):
-    recipe = models.ForeignKey(
-        to=Recipe, on_delete=models.CASCADE, related_name="steps"
-    )
+    recipe = models.ForeignKey(to=Recipe,
+                               on_delete=models.CASCADE,
+                               related_name="steps")
     text = models.TextField()
     order_with_respect_to = "recipe"
 
@@ -125,9 +110,9 @@ class RecipeStep(OrderedModel):
 
 
 class MealPlan(models.Model):
-    user = models.ForeignKey(
-        to=User, on_delete=models.CASCADE, related_name="meal_plans"
-    )
+    user = models.ForeignKey(to=User,
+                             on_delete=models.CASCADE,
+                             related_name="meal_plans")
     date = models.DateField(verbose_name="Date for plan")
     recipes = models.ManyToManyField(to=Recipe, related_name="meal_plans")
 

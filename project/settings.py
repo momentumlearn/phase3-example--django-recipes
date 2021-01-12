@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     "django_extensions",
     "ordered_model",
     # Project-specific
-    "users",
     "recipes",
 ]
 
@@ -97,16 +96,20 @@ DATABASES = {"default": env.db()}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME":
+        "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -133,7 +136,7 @@ STATICFILES_DIRS = [
 
 # Custom user model
 
-AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "recipes.User"
 
 # Debug toolbar config
 
