@@ -1,13 +1,52 @@
 from django import forms
+from django.contrib.auth import password_validation
 from django.forms import inlineformset_factory
-from .models import Recipe, Ingredient, RecipeStep
+from registration.forms import RegistrationForm
+
+from .models import Ingredient, Recipe, RecipeStep
+
+TEXT_INPUT_CLASSES = "pa2 f4 w-100"
+
+
+class CustomRegistrationForm(RegistrationForm):
+    email = forms.EmailField(
+        label="E-mail address",
+        widget=forms.EmailInput(attrs={"class": TEXT_INPUT_CLASSES}))
+    password1 = forms.CharField(
+        label="Password",
+        strip=False,
+        widget=forms.PasswordInput(attrs={
+            'autocomplete': 'new-password',
+            "class": TEXT_INPUT_CLASSES
+        }),
+        help_text=password_validation.password_validators_help_text_html(),
+    )
+    password2 = forms.CharField(
+        label="Password confirmation",
+        widget=forms.PasswordInput(attrs={
+            'autocomplete': 'new-password',
+            "class": TEXT_INPUT_CLASSES
+        }),
+        strip=False,
+        help_text="Enter the same password as before, for verification.",
+    )
+
+    class Meta(RegistrationForm.Meta):
+        widgets = {
+            'username':
+            forms.TextInput(attrs={"class": TEXT_INPUT_CLASSES}),
+            'password':
+            forms.PasswordInput(attrs={"class": TEXT_INPUT_CLASSES}),
+            'password_confirmation':
+            forms.PasswordInput(attrs={"class": TEXT_INPUT_CLASSES}),
+        }
 
 
 class RecipeForm(forms.ModelForm):
     tag_names = forms.CharField(
         label="Tags",
         help_text="Enter tags separated by spaces.",
-        widget=forms.TextInput(attrs={"class": "pa2 f4 w-100"}),
+        widget=forms.TextInput(attrs={"class": TEXT_INPUT_CLASSES}),
         required=False,
     )
 
@@ -20,19 +59,25 @@ class RecipeForm(forms.ModelForm):
             "public",
         ]
         widgets = {
-            "title": forms.TextInput(attrs={"class": "pa2 f4 w-100"}),
-            "prep_time_in_minutes": forms.NumberInput(attrs={"class": "pa2 f4 w-100"}),
-            "cook_time_in_minutes": forms.NumberInput(attrs={"class": "pa2 f4 w-100"}),
+            "title":
+            forms.TextInput(attrs={"class": TEXT_INPUT_CLASSES}),
+            "prep_time_in_minutes":
+            forms.NumberInput(attrs={"class": TEXT_INPUT_CLASSES}),
+            "cook_time_in_minutes":
+            forms.NumberInput(attrs={"class": TEXT_INPUT_CLASSES}),
         }
 
 
 IngredientFormset = inlineformset_factory(
     Recipe,
     Ingredient,
-    fields=("amount", "item",),
+    fields=(
+        "amount",
+        "item",
+    ),
     widgets={
-        "amount": forms.TextInput(attrs={"class": "pa2 f4 w-100"}),
-        "item": forms.TextInput(attrs={"class": "pa2 f4 w-100"}),
+        "amount": forms.TextInput(attrs={"class": TEXT_INPUT_CLASSES}),
+        "item": forms.TextInput(attrs={"class": TEXT_INPUT_CLASSES}),
     },
 )
 

@@ -153,6 +153,7 @@ INTERNAL_IPS = [
 
 ACCOUNT_ACTIVATION_DAYS = 7
 LOGIN_REDIRECT_URL = "/"
+REGISTRATION_FORM = 'recipes.forms.CustomRegistrationForm'
 
 # Email settings
 
