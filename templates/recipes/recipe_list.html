@@ -22,20 +22,3 @@
 {% include "recipes/_recipe_list.html" %}
 
 {% endblock %}
-
-{% block scripts %}
-<!-- <script>
-  $('.order-link').on('click', function (event) {
-    event.preventDefault()
-    fetch(event.target.href, {
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-    .then(res => res.text())
-    .then(body => {
-      $("#recipe-list").replaceWith(body)
-    })
-  })
-</script> -->
-{% endblock %}
