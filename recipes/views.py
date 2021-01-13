@@ -11,6 +11,7 @@ from .forms import (
     IngredientForm,
     RecipeForm,
     RecipeStepForm,
+    IngredientFormset,
 )
 from .models import Recipe, Tag
 
@@ -62,20 +63,29 @@ def recipe_detail(request, recipe_pk):
 def add_recipe(request):
     if request.method == "POST":
         form = RecipeForm(data=request.POST)
+        ingredient_formset = IngredientFormset(data=request.POST)
 
-        if form.is_valid():
+        if form.is_valid() and ingredient_formset.is_valid():
             recipe = form.save(commit=False)
             recipe.user = request.user
             recipe.save()
             recipe.set_tag_names(form.cleaned_data["tag_names"])
+            ingredients = ingredient_formset.save(commit=False)
+            for ingredient in ingredients:
+                ingredient.recipe = recipe
+                ingredient.save()
             return redirect(to="recipe_detail", recipe_pk=recipe.pk)
     else:
         form = RecipeForm()
+        ingredient_formset = IngredientFormset()
 
     return render(
         request,
         "recipes/add_recipe.html",
-        {"form": form},
+        {
+            "form": form,
+            "ingredient_formset": ingredient_formset
+        },
     )
 
 
@@ -87,13 +97,17 @@ def edit_recipe(request, recipe_pk):
         form = RecipeForm(instance=recipe,
                           data=request.POST,
                           files=request.FILES)
-        if form.is_valid():
+        ingredient_formset = IngredientFormset(instance=recipe,
+                                               data=request.POST)
+        if form.is_valid() and ingredient_formset.is_valid():
             recipe = form.save()
             recipe.set_tag_names(form.cleaned_data["tag_names"])
+            ingredient_formset.save()
             return redirect(to="recipe_detail", recipe_pk=recipe.pk)
     else:
         form = RecipeForm(instance=recipe,
                           initial={"tag_names": recipe.get_tag_names()})
+        ingredient_formset = IngredientFormset(instance=recipe)
 
     return render(
         request,
@@ -101,6 +115,7 @@ def edit_recipe(request, recipe_pk):
         {
             "form": form,
             "recipe": recipe,
+            "ingredient_formset": ingredient_formset,
         },
     )
 

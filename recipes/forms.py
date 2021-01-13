@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth import password_validation
+from django.forms import inlineformset_factory
 from registration.forms import RegistrationForm
 
 from .models import Ingredient, Recipe, RecipeStep
@@ -65,6 +66,20 @@ class RecipeForm(forms.ModelForm):
             "cook_time_in_minutes":
             forms.NumberInput(attrs={"class": TEXT_INPUT_CLASSES}),
         }
+
+
+IngredientFormset = inlineformset_factory(
+    Recipe,
+    Ingredient,
+    fields=(
+        "amount",
+        "item",
+    ),
+    widgets={
+        "amount": forms.TextInput(attrs={"class": TEXT_INPUT_CLASSES}),
+        "item": forms.TextInput(attrs={"class": TEXT_INPUT_CLASSES}),
+    },
+)
 
 
 class IngredientForm(forms.ModelForm):

@@ -8,6 +8,24 @@
   {% csrf_token %}
   {{ form.as_p }}
 
+  <h3>Ingredients</h3>
+
+  {{ ingredient_formset.management_form }}
+  {% for form in ingredient_formset %}
+    <div class="flex justify-between">
+    {% for field in form %}
+      {% if field.is_hidden %}
+        <div>{{ field }}</div>
+      {% else %}
+      <div class="mb2 flex-auto mr2">
+        <div class="mb1">{{ field.label_tag }}</div>
+        <div>{{ field }}</div>
+      </div>
+      {% endif %}
+    {% endfor %}
+    </div>
+  {% endfor %}
+
   <div>
     <button type="submit">Update recipe</button>
   </div>
