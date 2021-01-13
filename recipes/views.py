@@ -54,6 +54,7 @@ def recipe_detail(request, recipe_pk):
             "recipe": recipe,
             "is_user_favorite": request.user.is_favorite_recipe(recipe),
             "ingredient_form": IngredientForm(),
+            "step_form": RecipeStepForm()
         },
     )
 

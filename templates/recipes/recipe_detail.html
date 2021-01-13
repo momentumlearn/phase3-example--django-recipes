@@ -85,7 +85,15 @@ Recipe Book - {{ recipe.title }}
 </ol>
 
 {% if user == recipe.user %}
-  <p><a href="{% url 'add_recipe_step' recipe_pk=recipe.pk %}">Add another step</a></p>
+  {% if recipe.steps.count > 0 %}
+  <p><a id="show-step-form" href="{% url 'add_recipe_step' recipe_pk=recipe.pk %}">Add another step</a></p>
+  {% endif %}
+
+  <form class="{% if recipe.steps.count > 0 %}dn{% endif %}" id="step-form" action="{% url 'add_recipe_step' recipe_pk=recipe.pk %}" method="POST">
+    {% csrf_token %}
+    {{ step_form.as_p }}
+    <div><button type="submit">Add recipe step</button></div>
+  </form>
 {% endif %}
 
 <script>
