@@ -99,11 +99,3 @@ class RecipeStepForm(forms.ModelForm):
 
 class MealPlanForm(forms.Form):
     recipe = forms.ChoiceField(choices=[])
-
-
-def make_meal_plan_form_for_user(user, data=None):
-    form = MealPlanForm(data=data)
-    form.fields["recipe"].choices = [
-        (recipe.pk, recipe.title) for recipe in user.recipes.order_by("title")
-    ]
-    return form
